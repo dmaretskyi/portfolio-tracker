@@ -33,6 +33,13 @@ export class CoingeckoApi {
 
     return result;
   }
+
+  @cache({ expiry: 1000 * 60 * 60 })
+  async getPrices(ticker: string, days: number): Promise<PriceData> {
+    const response = await fetch(`https://api.coingecko.com/api/v3/coins/${ticker}/market_chart?vs_currency=usd&days=${days}`);
+    const data: PriceData = await response.json();
+    return data;
+  }
 }
 
 
@@ -232,4 +239,10 @@ export interface MarketData {
   name: string
   image: string
   current_price: number
+}
+
+export interface PriceData {
+  prices: [timestamp: number, price: number][],
+  market_caps: [timestamp: number, price: number][],
+  total_volumes: [timestamp: number, price: number][],
 }

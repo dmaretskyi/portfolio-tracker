@@ -10,6 +10,8 @@ export interface PortfolioPageProps {
 export const PortfolioPage = ({ accounts }: PortfolioPageProps) => {
   const { value: data, loading, error } = useAsync(() => queryData(accounts));
 
+  console.log(data)
+
   return (
     <>
       {data && <Portfolio data={data} />}

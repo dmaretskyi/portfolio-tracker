@@ -3,6 +3,7 @@ import { PortfolioData } from '../core';
 import { formatUsd, shortenAccountId } from './formatting';
 import { AssetTableRow } from './AssetTableRow';
 import { COLOR_GREY, Panel, TextPrimary, TextSecondary, TitleBig } from './common';
+import { NetWorthChart } from './NetWorthChart';
 
 export interface PortfolioProps {
   data: PortfolioData
@@ -13,6 +14,7 @@ export const Portfolio = ({ data }: PortfolioProps) => (
     <Panel>
       <TitleBig>{formatUsd(data.totalValue)}</TitleBig>
       <TextSecondary>net worth</TextSecondary>
+      <NetWorthChart data={data.history} />
     </Panel>
     <Spacer/>
     <Panel>
