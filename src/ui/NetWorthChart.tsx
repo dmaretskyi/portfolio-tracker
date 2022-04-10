@@ -33,7 +33,9 @@ export const NetWorthChart = ({ data }: NetWorthChartProps) => (
       <XAxis
         dataKey="timestamp"
         tickFormatter={value => `${new Date(value).getMonth()}/${new Date(value).getFullYear().toString().slice(2)}`}
-        interval={20}
+        tickCount={data.length}
+        type="number"
+        domain={['dataMin', 'dataMax']}
       />
       <YAxis />
       <Tooltip formatter={(value: any) => [formatUsd(value)]} labelFormatter={(value: any) => new Date(value).toLocaleDateString()} />
