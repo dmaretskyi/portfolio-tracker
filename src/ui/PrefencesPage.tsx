@@ -10,6 +10,25 @@ export interface PreferencesProps {
 export const PreferencesPage = ({ accounts, setAccounts }: PreferencesProps) => {
   const [uri, setUri] = useState('');
   const [accType, setAccType] = useState('');
+
+  const handleAddAccount = (acc: Array<string>) => {
+    switch (acc[0]) {
+      case 'Ethereum:':
+        if (!(/0x[a-fA-F0-9]{40}/.test(acc[1]))) {
+          alert("Problem"); 
+          break;
+        }
+        setAccounts([...accounts, acc[0] + acc[1]]);
+        setAccType('');
+        setUri('');
+        break;
+      case "Ftx":
+      //TODO
+
+    }
+
+  }
+
   return (
     <Panel>
       <TextPrimary style={{ marginBottom: '3vh' }}>
@@ -26,17 +45,16 @@ export const PreferencesPage = ({ accounts, setAccounts }: PreferencesProps) => 
 
       <AccountEntry>
         <Select onChange={e => setAccType(e.target.value)}>
-          <Option value='' >-</Option>
           <Option value='Ethereum:' >Ethereum</Option>
           <Option value='Ftx:'>Ftx</Option>
         </Select>
-        <Button style={{ justifySelf: 'end' }} onClick={() => { setAccounts([...accounts, accType + uri]); setAccType(''); setUri('') }}>Add</Button>
+        <Button style={{ justifySelf: 'end' }} onClick={() => handleAddAccount([accType, uri])}>Add</Button>
         <TextSecondary>{accType !== 'Ftx:' ? 'Address:' : 'API Key:'}</TextSecondary>
         <Input value={uri} onChange={(e) => setUri(e.target.value)} />
         {accType === 'Ftx:' &&
           <>
-            <TextSecondary style={{marginTop: '1vh'}}>Secret:</TextSecondary>
-            <Input style={{marginTop: '1vh'}} value={uri} onChange={(e) => setUri(e.target.value)} />
+            <TextSecondary style={{ marginTop: '1vh' }}>Secret:</TextSecondary>
+            <Input style={{ marginTop: '1vh' }} value={uri} onChange={(e) => setUri(e.target.value)} />
           </>
         }
       </AccountEntry>
