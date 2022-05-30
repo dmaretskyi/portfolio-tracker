@@ -7,41 +7,42 @@ export interface PreferencesProps {
   setAccounts: (accounts: string[]) => void
 }
 
+enum AccountType {
+  ETHEREUM,
+  FTX
+}
+
 export const PreferencesPage = ({ accounts, setAccounts }: PreferencesProps) => {
-  const [uri, setUri] = useState('');
+  const [path, setPath] = useState('');
   const [secret, setSecret] = useState('');
-  const [accType, setAccType] = useState('Ethereum:');
-  const [problem, setProblem] = useState(false);
+  const [accountType, setAccountType] = useState(AccountType.ETHEREUM);
+  const [hasError, setHasError] = useState(false);
 
   const handleAddAccount = () => {
-    console.log(accType)
-    switch (accType) {
-      case 'Ethereum:':
-        if (!(/0x[a-fA-F0-9]{40}/.test(uri))) {
-          setProblem(true);
+    console.log(accountType)
+    switch (accountType) {
+      case AccountType.ETHEREUM:
+        if (!(/0x[a-fA-F0-9]{40}/.test(path))) {
+          setHasError(true);
           break;
-          //TODO
         }
-        setAccounts([...accounts, accType + uri]);
-        setAccType('');
-        setUri('');
-        setProblem(false);
+        setAccounts([...accounts, `Ethereum:${path}`]);
+        setAccountType(AccountType.ETHEREUM);
+        setPath('');
+        setHasError(false);
         break;
-      case "Ftx:":
-        if (!uri || !secret) {
-          setProblem(true);
+      case AccountType.FTX:
+        if (!path || !secret) {
+          setHasError(true);
           break;
-          //TODO
         }
-        setAccounts([...accounts, accType + uri+ "?secret=" + secret]);
-        setAccType('');
-        setUri('');
+        setAccounts([...accounts, `Ftx:${path}?secret=${secret}`]);
+        setAccountType(AccountType.ETHEREUM);
+        setPath('');
         setSecret('');
-        setProblem(false);
+        setHasError(false);
         break;
-
     }
-
   }
 
   return (
@@ -52,28 +53,28 @@ export const PreferencesPage = ({ accounts, setAccounts }: PreferencesProps) => 
 
       {accounts.map((account, index) => (
         <AccountEntry style={index === 0 ? { borderWidth: '1px 0px 1px 0px' } : {}} key={index}>
-          {account.split(':')[0]}
+          {new URL(account).protocol === 'ethereum:' ? 'Ethereum' : "Ftx"}
           <Button style={{ justifySelf: 'end' }} onClick={() => setAccounts(accounts.filter((a, i) => i !== index))}>Remove</Button>
-          <TextSecondary>Address:</TextSecondary> {account.split(':')[1].split('?')[0]}
-          {account.split(':')[0] === "Ftx" && <><TextSecondary>Secret:</TextSecondary> {account.split(':')[1].split('=')[1]}</>}
+          <TextSecondary>{new URL(account).protocol === 'ethereum:' ? 'Address:' : 'API key'}</TextSecondary> {new URL(account).pathname}
+          {new URL(account).protocol === "ftx:" && <><TextSecondary>Secret:</TextSecondary> {new URL(account).searchParams.get('secret')}</>}
         </AccountEntry>
       ))}
 
       <AccountEntry>
-        <Select onChange={e => setAccType(e.target.value)}>
-          <Option value='Ethereum:' >Ethereum</Option>
-          <Option value='Ftx:'>Ftx</Option>
+        <Select onChange={e => setAccountType(e.target.value === 'Ftx' ? AccountType.FTX : AccountType.ETHEREUM)}>
+          <Option value='Ethereum' >Ethereum</Option>
+          <Option value='Ftx'>Ftx</Option>
         </Select>
         <Button style={{ justifySelf: 'end' }} onClick={() => handleAddAccount()}>Add</Button>
-        <TextSecondary>{accType !== 'Ftx:' ? 'Address:' : 'API Key:'}</TextSecondary>
-        <Input value={uri} style={{borderColor: problem ? COLOR_FAILURE : COLOR_TEXT_SECONDARY }} onChange={(e) => setUri(e.target.value)} />
-        {accType === 'Ftx:' &&
+        <TextSecondary>{accountType !== AccountType.FTX ? 'Address:' : 'API Key:'}</TextSecondary>
+        <Input value={path} style={{ borderColor: hasError ? COLOR_FAILURE : COLOR_TEXT_SECONDARY }} onChange={(e) => setPath(e.target.value)} />
+        {accountType === AccountType.FTX &&
           <>
             <TextSecondary style={{ marginTop: '1vh' }}>Secret:</TextSecondary>
-            <Input style={{ marginTop: '1vh', borderColor: problem ? COLOR_FAILURE : COLOR_TEXT_SECONDARY }} value={secret} onChange={(e) => setSecret(e.target.value)} />
+            <Input style={{ marginTop: '1vh', borderColor: hasError ? COLOR_FAILURE : COLOR_TEXT_SECONDARY }} value={secret} onChange={(e) => setSecret(e.target.value)} />
           </>
         }
-        {problem && <Alert>Invalid address</Alert>}
+        {hasError && <Alert>Invalid address</Alert>}
       </AccountEntry>
     </Panel>
   )
